@@ -16,16 +16,14 @@ export default function Login() {
     watch,
     formState: { errors },
   } = useForm<Inputs>();
-  const api_base = "http://localhost:5000/api";
+  const api_base = "http://localhost:3000/api";
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      const response = await axios.post(
-        `/api/auth/sign-in`,
-        {
-          ...data,
-        }
-      );
-      console.log(response.data);
+      const response = await axios.post(`${api_base}/auth/sign-in`, {
+        ...data,
+      });
+      const res_data = await response.data;
+      console.log(res_data);
     } catch (error) {
       console.log(error);
     }
