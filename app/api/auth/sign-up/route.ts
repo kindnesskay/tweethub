@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import hashPassword from "@/utils/hashPassword";
 // Define interface for request body
 interface Body {
   username: string;
@@ -13,9 +14,9 @@ interface Body {
 type message = {
   message: string;
 };
-export  async function POST(req: NextRequest) {
+export async function POST(req: NextRequest) {
   // Assert the type of req.body using 'as'
-  
+
   const { username, password, confirm_password } = req.body as unknown as Body;
   try {
     if (!username) {
@@ -47,8 +48,7 @@ export  async function POST(req: NextRequest) {
     // set proifle image based on username
     const profilePic = generateUsernameProfilePic(username);
     // generate salt and hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await hashPassword(password);
     // Add to user model
     const newUser = new User({
       username,
@@ -64,7 +64,7 @@ export  async function POST(req: NextRequest) {
 
       cookies().set({
         name: "_auth",
-        value: token  ,
+        value: token,
         httpOnly: true,
         path: "/",
       });
