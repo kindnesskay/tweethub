@@ -1,7 +1,6 @@
 import User from "@/models/user.model";
 import generateUsernameProfilePic from "@/utils/generateUsernameProfilePic";
 import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import hashPassword from "@/utils/hashPassword";
