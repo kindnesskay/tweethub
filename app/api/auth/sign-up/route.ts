@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import hashPassword from "@/utils/hashPassword";
+import { validatePassword } from "@/utils/validatePassword";
 // Define interface for request body
 interface Body {
   username: string;
@@ -46,6 +47,12 @@ export async function POST(req: NextRequest) {
     }
     // set proifle image based on username
     const profilePic = generateUsernameProfilePic(username);
+    // validate password
+    const validPassword = validatePassword(password);
+    if (validPassword.valid) {
+      const message = validPassword.error;
+      return NextResponse.json({ message }, { status: 400 });
+    }
     // generate salt and hash password
     const hashedPassword = await hashPassword(password);
     // Add to user model
