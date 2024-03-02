@@ -1,10 +1,10 @@
 import User from "@/models/user.model";
 import generateUsernameProfilePic from "@/utils/generateUsernameProfilePic";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import hashPassword from "@/utils/hashPassword";
 import { validatePassword } from "@/utils/validatePassword";
+import * as jose from "jose";
 // Define interface for request body
 interface Body {
   username: string;
@@ -62,19 +62,23 @@ export async function POST(req: NextRequest) {
       profilePic,
     });
     const userID = newUser._id;
+    // generate jwt
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const alg = "HS256";
+    const jwt = await new jose.SignJWT({ "urn:example:claim": true })
+      .setProtectedHeader({ alg })
+      .setExpirationTime("10d")
+      .sign(secret);
 
-    if (process.env.JWT_SECRET) {
-      const token = jwt.sign({ userID }, process.env.JWT_SECRET, {
-        expiresIn: "15d",
-      });
+    console.log(jwt);
 
-      cookies().set({
-        name: "_auth",
-        value: token,
-        httpOnly: true,
-        path: "/",
-      });
-    }
+    cookies().set({
+      name: "_auth",
+      value: jwt,
+      httpOnly: true,
+      path: "/",
+    });
+
     NextResponse.json(
       { id: userID, username: newUser.username },
       { status: 201 }
