@@ -5,9 +5,10 @@ import { cookies } from "next/headers";
 import hashPassword from "@/utils/hashPassword";
 import { validatePassword } from "@/utils/validatePassword";
 import * as jose from "jose";
+import { connectToDb } from "@/utils/connectMongoDb";
 // Define interface for request body
 interface Body {
-  username: string;
+  email: string;
   password: string;
   confirm_password: string;
 }
@@ -15,11 +16,12 @@ type message = {
   message: string;
 };
 export async function POST(req: NextRequest) {
-  // Assert the type of req.body using 'as'
-
-  const { username, password, confirm_password } = req.body as unknown as Body;
+  // Assert the type of req.body using
+  await connectToDb();
+  
+  const { email, password, confirm_password } = req.body as unknown as Body;
   try {
-    if (!username) {
+    if (!email) {
       return NextResponse.json(
         { message: "username is required" },
         { status: 400 }
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const user = await User.findOne({ username: username });
+    const user = await User.findOne({ email:email});
 
     if (user) {
       return NextResponse.json(
@@ -46,7 +48,8 @@ export async function POST(req: NextRequest) {
       );
     }
     // set proifle image based on username
-    const profilePic = generateUsernameProfilePic(username);
+    const name_from_email=email.split("@")[1].split(".")[0]
+    const profilePic = generateUsernameProfilePic(name_from_email);
     // validate password
     const validPassword = validatePassword(password);
     if (validPassword.valid) {
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await hashPassword(password);
     // Add to user model
     const newUser = new User({
-      username,
+      email,
       password: hashedPassword,
       profilePic,
     });
@@ -80,7 +83,7 @@ export async function POST(req: NextRequest) {
     });
 
     NextResponse.json(
-      { id: userID, username: newUser.username },
+      { id: userID, email: newUser.email },
       { status: 201 }
     );
   } catch (error) {
