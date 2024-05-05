@@ -2,31 +2,32 @@
 import Link from "next/link";
 import { useForm, SubmitHandler } from "react-hook-form";
 import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 type Inputs = {
   username: string;
   usernameRequired: string;
   password: string;
   passwordRequired: string;
-  
 };
 
 export default function Login() {
+  const { login } = useAuth();
+  const router = useRouter();
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm<Inputs>();
   const api_base = "http://localhost:3000/api";
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log(data);
-    return;
     try {
       const response = await axios.post(`${api_base}/auth/sign-in`, {
         ...data,
       });
       const res_data = await response.data;
-      console.log(res_data);
+      login(res_data.user);
+      router.push("/profile");
     } catch (error) {
       console.log(error);
     }

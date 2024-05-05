@@ -1,10 +1,11 @@
 import { Inter } from "next/font/google";
 import React from "react";
-import '../globals.css'
-const inter=Inter({subsets:['latin']})
+import "../globals.css";
+import AuthProvider from "@/context/AuthContext";
+const inter = Inter({ subsets: ["latin"] });
 export default function layout({ children }: { children: React.ReactNode }) {
   return (
-    
+    <AuthProvider>
       <html lang="en">
         <head>
           <title>Authentication</title>
@@ -13,6 +14,6 @@ export default function layout({ children }: { children: React.ReactNode }) {
           <main>{children}</main>
         </body>
       </html>
-    
+    </AuthProvider>
   );
 }

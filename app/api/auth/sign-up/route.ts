@@ -18,12 +18,13 @@ type message = {
 export async function POST(req: NextRequest) {
   // Assert the type of req.body using
   await connectToDb();
-  
-  const { email, password, confirm_password } = req.body as unknown as Body;
+
+  const { email, password, confirm_password } = await req.json();
+
   try {
     if (!email) {
       return NextResponse.json(
-        { message: "username is required" },
+        { message: "email is required" },
         { status: 400 }
       );
     }
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const user = await User.findOne({ email:email});
+    const user = await User.findOne({ email: email });
 
     if (user) {
       return NextResponse.json(
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest) {
       );
     }
     // set proifle image based on username
-    const name_from_email=email.split("@")[1].split(".")[0]
+    const name_from_email = email.split("@")[0];
     const profilePic = generateUsernameProfilePic(name_from_email);
     // validate password
     const validPassword = validatePassword(password);
@@ -57,32 +58,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message }, { status: 400 });
     }
     // generate salt and hash password
-    const hashedPassword = await hashPassword(password);
+    const hashed_password = await hashPassword(password);
     // Add to user model
     const newUser = new User({
       email,
-      password: hashedPassword,
+      password: hashed_password,
       profilePic,
     });
+    await newUser.save();
     const userID = newUser._id;
     // generate jwt
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     const alg = "HS256";
-    const jwt = await new jose.SignJWT({ "urn:example:claim": true })
+    const jwt = await new jose.SignJWT({ id: userID })
       .setProtectedHeader({ alg })
       .setExpirationTime("10d")
       .sign(secret);
-
-    console.log(jwt);
-
+    // set cookie header
     cookies().set({
-      name: "_auth",
+      name: "tweethub_auth",
       value: jwt,
       httpOnly: true,
       path: "/",
     });
 
-    NextResponse.json(
+    return NextResponse.json(
       { id: userID, email: newUser.email },
       { status: 201 }
     );

@@ -6,3 +6,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components{
+    main{
+        @apply bg-gray-100 min-h-screen
+    }
+    section{
+        @apply py-16
+    }
+    .red-border {
+        @apply border-red-800 border border-solid
+    }
+}
+

@@ -48,7 +48,6 @@ export default function SignUp() {
   const api_base = "http://localhost:3000/api";
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data);
     const request = await axios.post(`${api_base}/auth/sign-up`, { ...data });
     const response_data = await request.data;
     console.log(response_data);
