@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
-import { unique } from "next/dist/build/utils";
 const UserSchema = new mongoose.Schema(
   {
     id: String,
     fullname: {
       type: String,
+      default:""
     },
-    usermame: { type: String, unique: true },
+    usermame: { type: String ,default:""},
     email: {
       type: String,
       required: true,

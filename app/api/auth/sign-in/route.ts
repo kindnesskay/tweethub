@@ -1,7 +1,7 @@
 import User from "@/models/user.model";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import * as jose from "jose";
 import { cookies } from "next/headers";
 import { connectToDb } from "@/utils/connectMongoDb";
 
@@ -44,12 +44,15 @@ export async function POST(req: NextRequest) {
     const userID = user._id;
 
     if (process.env.JWT_SECRET) {
-      const token = jwt.sign({ userID }, process.env.JWT_SECRET, {
-        expiresIn: "15d",
-      });
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      const alg = "HS256";
+      const token = await new jose.SignJWT({ id: userID })
+        .setProtectedHeader({ alg })
+        .setExpirationTime("10d")
+        .sign(secret);
 
       cookies().set({
-        name: "_auth",
+        name: "tweethub_auth",
         value: token,
         httpOnly: true,
         path: "/",
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
       profilePic: user.profilePic,
     };
     return NextResponse.json(
-      { message: "sign in successful" },
+      { message: "sign in successful", user: userData },
       { status: 200 }
     );
   } catch (error) {

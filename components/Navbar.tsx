@@ -8,7 +8,7 @@ export default function Navbar() {
           <Link href={"/"}>logo</Link>
         </div>
         <div>
-          <Link href={'/sign-up'}>Account</Link>
+          <Link href={'/auth/sign-in'}>Account</Link>
         </div>
       </div>
     </nav>

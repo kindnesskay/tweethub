@@ -1,7 +1,7 @@
 export default function page() {
   return (
     <div>
-      <p>Dashboard</p>
+      <p>contact page</p>
     </div>
   )
 }
